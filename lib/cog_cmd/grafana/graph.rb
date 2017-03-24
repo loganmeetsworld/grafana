@@ -8,9 +8,10 @@ module CogCmd::Grafana
       panel = client.panels(dashboard_slug)
                     .find { |p| p["title"].parameterize == panel_slug }
 
-      graph = client.graph(dashboard_slug, panel["id"])
+      graph = client.graph(dashboard_slug, panel["id"], server)
 
-      response.content = graph
+      response.template = 'graph'
+      response.content = { graph_img: graph, dash_url: "#{ENV['GRAFANA_URL']}/dashboard/db/#{dashboard_slug}", panel_url: "#{ENV['GRAFANA_URL']}/dashboard/db/#{dashboard_slug}/?panelId=#{panel["id"]}&fullscreen&orgId=1" }
     end
 
     private
@@ -21,6 +22,10 @@ module CogCmd::Grafana
 
     def panel_slug
       request.args[1]
+    end
+
+    def server
+      request.args[3]
     end
   end
 end

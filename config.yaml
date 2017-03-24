@@ -2,7 +2,7 @@
 cog_bundle_version: 5
 name: grafana
 description: Grafana Graphs in Chat
-version: 0.2.2
+version: 0.2.28
 docker:
   image: "kickstarter/grafana"
   tag: "latest"
@@ -11,7 +11,11 @@ config:
   - var: GRAFANA_URL
     description: "URL to your Grafana instance"
   - var: GRAFANA_API_KEY
-    description: "API key for your Grafana instnace"
+    description: "API key for your Grafana instance"
+  - var: GRAFANA_S3_BUCKET
+    description: "s3 bucket name"
+  - var: GRAFANA_S3_PATH
+    description: "s3 package name"
 commands:
   dashboards:
     executable: "/home/bundle/cog-command"
@@ -28,3 +32,21 @@ commands:
     description: View a graph
     rules:
       - allow
+templates:
+  dashboards: 
+    body: |
+      ~each var=$results as=dashboard~
+      :sparkles: ~$dashboard.slug~
+      ~end~
+  panels: 
+    body: |
+      ~each var=$results as=panel~
+      :sparkles: ~$panel.slug~
+      ~end~
+  graph:
+    body: |
+      ~each var=$results as=graph~
+      Dashboard: ~$graph.dash_url~
+      Panel: ~$graph.panel_url~
+      ~$graph.graph_img~
+      ~end~

@@ -1,7 +1,6 @@
 require 'httparty'
 require 'aws-sdk'
 require 'securerandom'
-require 'active_support/all'
 
 class Grafana::Client
   include HTTParty
@@ -27,16 +26,28 @@ class Grafana::Client
     dashboard(dashboard_slug)["rows"].flat_map { |r| r["panels"] }
   end
 
-  def graph(dashboard_slug, panel_id)
-    query = {from: 1.hour.ago.to_i,
-             to: Time.now.to_i,
+  def graph(dashboard_slug, panel_id, server)
+    query = {from: DateTime.now.strftime('%Q').to_i - (60 * 60 * 1000),
+             to: DateTime.now.strftime('%Q').to_i,
              panelId: panel_id,
-             width: 800,
-             height: 600}
+             width: 850,
+             height: 500
+            }.merge(template_vars(dashboard_slug, server))
 
     image = get("/render/dashboard-solo/db/#{dashboard_slug}", query).body
     url = write_to_s3(image)
-    {url: url}
+    return url
+  end
+
+  def template_vars(dashboard_slug, server=nil)
+    case dashboard_slug
+    when /kickstarter/
+      { 'var-env' => 'production' }
+    when /telegraf/
+      { 'var-env' => 'production', 'var-server' => server }
+    else
+      {}
+    end
   end
 
   private

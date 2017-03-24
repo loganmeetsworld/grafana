@@ -4,6 +4,7 @@ require 'grafana/command'
 module CogCmd::Grafana
   class Dashboards < Grafana::Command
     def run_command
+      response.template = 'dashboards'
       response.content = formatted_dashboards
     end
 
@@ -14,15 +15,11 @@ module CogCmd::Grafana
     end
 
     def formatted_dashboards
-      slugs = Array.new
       if tag.nil?
-        dashboards.each{|db| slugs.push(db["slug"]) }
+        dashboards
       else
-        tagged_dashboards = dashboards.select{|db| db["tags"].include? tag.to_s }
-        tagged_dashboards.each{|db| slugs.push(db["slug"]) }
-        if slugs.empty? then slugs = "Sorry no dashboards under that tag." end
+        dashboards.select{|db| db["tags"].include? tag.to_s }
       end
-      return slugs.to_json
     end
 
     def tag
