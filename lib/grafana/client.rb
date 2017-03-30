@@ -26,8 +26,9 @@ class Grafana::Client
     dashboard(dashboard_slug)["rows"].flat_map { |r| r["panels"] }
   end
 
-  def graph(dashboard_slug, panel_id, server)
-    query = {from: DateTime.now.strftime('%Q').to_i - (60 * 60 * 1000),
+  def graph(dashboard_slug, panel_id, hrs, server)
+    hours = hrs == 0 ? 1 : hrs
+    query = {from: DateTime.now.strftime('%Q').to_i - (hours * 60 * 60 * 1000),
              to: DateTime.now.strftime('%Q').to_i,
              panelId: panel_id,
              width: 850,

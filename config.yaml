@@ -1,12 +1,16 @@
 ---
 cog_bundle_version: 5
 name: grafana
-description: Grafana Graphs in Chat
-version: 0.2.28
+description: Grafana Graphs in Chat.
+long_description: >
+  This bundle provides commands for viewing and inspecting Grafana graphs in Slack. To communication with the Grafana API and save these graphs as png's in S3, we use the aws-sdk library in Ruby. Permissions are set up for Cog to write to a specific bucket in s3.
+version: 0.2.36
 docker:
   image: "kickstarter/grafana"
   tag: "latest"
 config:
+  notes: >
+    When creating the IAM access key for use with Cog, we have to make sure the user's key has the permissions to write to a specific S3 bucket.
   env:
   - var: GRAFANA_URL
     description: "URL to your Grafana instance"
@@ -15,21 +19,45 @@ config:
   - var: GRAFANA_S3_BUCKET
     description: "s3 bucket name"
   - var: GRAFANA_S3_PATH
-    description: "s3 package name"
+    description: "s3 path name"
 commands:
   dashboards:
     executable: "/home/bundle/cog-command"
-    description: List dashboards
+    description: List Grafana dashboards, can take tag
+    examples: |
+      List all dashboards:
+
+      dashboards
+
+      List dashboards associated with a tag:
+
+      dashboards kickstarter
     rules:
       - allow
   panels:
     executable: "/home/bundle/cog-command"
     description: List panels in a dashboard
+    examples: |
+      List all panels for a dashboard:
+
+      panels kickstarter-overview
     rules:
       - allow
   graph:
     executable: "/home/bundle/cog-command"
     description: View a graph
+    examples: |
+      View a graph:
+
+      graph kickstarter-overview logins
+
+      View a graph for a specified amount of hours:
+
+      graph kickstarter-overview logins 6
+
+      View a templated overview for a specific node:
+
+      graph telegraf-host-overview load-averages 1 ip-10-144-225-121
     rules:
       - allow
 templates:
